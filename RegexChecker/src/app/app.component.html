@@ -1,0 +1,37 @@
+<div class="wrapper">
+  <form class="content" [formGroup]="formGroup">
+    <div class="regex-message">
+      <p class="error-slot error" *ngIf="!isRegexValid && formGroup.controls['regex'].dirty" > The Regular expression is not valid.</p>
+      <p class="error-slot success" *ngIf="isRegexValid && formGroup.controls['regex'].dirty" > The Regular expression is valid.</p>
+    </div>
+    
+    <mat-form-field class="input">
+      <mat-label>Regular Expression</mat-label>
+      <input matInput type="text" formControlName="regex" (change)="onRegexInputChange()">
+      <button *ngIf="formGroup.controls['regex'].dirty" matSuffix mat-icon-button (click)="clearField('regex')">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-error *ngIf="formGroup.controls['regex'].hasError('required')">
+        Please enter a regex.
+      </mat-error>
+    </mat-form-field>
+    
+    <mat-form-field class="example-form-field">
+      <mat-label>String</mat-label>
+      <input matInput type="text" formControlName="string" (change)="resultMessage = ''">
+      <button *ngIf="formGroup.controls['string'].dirty" matSuffix mat-icon-button (click)="clearField('string')">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-error *ngIf="formGroup.controls['string'].hasError('required')"> 
+        Please enter a string.
+      </mat-error>
+    </mat-form-field>
+      
+    <button mat-flat-button [disabled]="!formGroup.valid || !isRegexValid" (click)="checkString()">Check string</button>
+
+    <br>
+
+    <p class="result-message success" *ngIf="isResultValid">{{resultMessage}}</p>
+    <p class="result-message error" *ngIf="!isResultValid">{{resultMessage}}</p>
+  </form>
+</div>
