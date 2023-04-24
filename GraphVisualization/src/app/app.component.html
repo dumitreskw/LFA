@@ -1,0 +1,50 @@
+<div class="title">
+  <p>Graph Visualizer</p>
+</div>
+<div class="wrapper">
+  <div class="actions">
+      <div class="button">
+          <button mat-flat-button (click)="addNode()" >Add Node</button>
+      </div>
+      <div class="button">
+          <button mat-flat-button (click)="showEditNode = !showEditNode; showSaveButton = true" >Edit Node</button>
+      </div>
+      <div class="button">
+          <button mat-flat-button (click)="addEdge()">Add Edge</button>
+      </div>
+      <div class="button">
+          <button mat-flat-button (click)="showEditEdge = !showEditEdge; showSaveButton = true">Edit Edge</button>
+      </div>
+      <div class="button">
+          <button mat-flat-button (click)="removeSelected()">Remove Selected</button>
+      </div>
+
+      <p class="message" *ngIf="showEditEdge && showSaveButton">You must first select an edge.</p>
+      <p class="message" *ngIf="showEditNode && showSaveButton">You must first select a node.</p>
+      <div class="edit-node popup" *ngIf="showEditNode">
+          <form>
+              <mat-form-field class="example-full-width">
+                  <mat-label>Node Name</mat-label>
+                  <input matInput [formControl]="nodeControl">
+              </mat-form-field>
+          </form>
+
+          <div class="button" *ngIf="showSaveButton">
+              <button mat-flat-button (click)="editNode()">Save</button>
+          </div>
+      </div>
+      <div class="edit-edge popup" *ngIf="showEditEdge">
+          <mat-form-field class="example-full-width">
+              <mat-label>Edge Name</mat-label>
+              <input matInput [formControl]="edgeControl">
+          </mat-form-field>
+
+          <div class="button" *ngIf="showSaveButton">
+              <button mat-flat-button (click)="editEdge()">Save</button>
+          </div>
+      </div>
+  </div>
+  
+  <div id="visNetwork" #visNetwork></div>
+</div>
+
