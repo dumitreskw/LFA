@@ -3,6 +3,7 @@ import { FormControl } from '@angular/forms';
 
 import { DataSet } from 'vis-data/peer';
 import { Network } from 'vis-network';
+import { forEach } from 'vis-util';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -10,13 +11,14 @@ import { Network } from 'vis-network';
 })
 export class AppComponent implements AfterViewInit {
   @ViewChild('visNetwork', { static: false }) visNetwork!: ElementRef;
-  showEditNode: boolean = false;
-  showEditEdge: boolean = false;
-  showSaveButton: boolean = false;
-
+  showEditNode = false;
+  showEditEdge = false;
+  showSaveButton = false;
+  showError = false;
   nodeCount!: number;
   edgeControl = new FormControl('');
   nodeControl = new FormControl('');
+  nodeIdControl = new FormControl('');
   private networkInstance: any;
 
   constructor() {}
@@ -37,7 +39,9 @@ export class AppComponent implements AfterViewInit {
 
   editNode(): void {
     this.showEditEdge = false;
-    this.networkInstance.editNodeMode();
+    let nodeId = this.networkInstance.getSelectedNodes()[0];
+
+    this.updateNode(nodeId);
   }
 
   addEdge(): void {
@@ -68,12 +72,10 @@ export class AppComponent implements AfterViewInit {
         enabled: false,
         addNode: (nodeData: any, callback: any) =>
           this.addNodeCallback(nodeData, callback),
-        editNode: (nodeData: any, callback: any) =>
-          this.editNodeCallback(nodeData, callback),
         addEdge: (edgeData: any, callback: any) =>
           this.addEdgeCallback(edgeData, callback),
         editEdge: (edgeData: any, callback: any) =>
-          this.editEdgeCallback(edgeData, callback),
+          this.editEdgeCallback(edgeData, callback)
       },
     };
 
@@ -84,17 +86,57 @@ export class AppComponent implements AfterViewInit {
     this.networkInstance.disableEditMode();
   }
 
-  private addNodeCallback(nodeData: any, callback: any) {
-    this.showEditNode = !this.showEditNode;
-    nodeData.label = this.nodeControl.value;
-    nodeData.id = ++this.nodeCount;
-    callback(nodeData);
+  private updateNode(id: any): void {
+    let node = this.networkInstance.body.data.nodes.get(id);
+    let newId = this.nodeIdControl.value;
+    let edgesCopy: any[] = [];
+    let edges = this.networkInstance.getConnectedEdges(node.id);
+
+    if (!this.canNodeBeEdited(id)) {
+      this.showError = true;
+      return;
+    }
+
+    this.showError = false;
+
+    edges.forEach((e: any) => {
+      let edge = this.networkInstance.body.data.edges.get(e);
+      edgesCopy.push(edge);
+    });
+
+    this.networkInstance.body.data.edges.remove(edges);
+    this.networkInstance.body.data.nodes.remove(node);
+
+    node.id = newId;
+    node.label = `[${this.nodeIdControl.value}] ${this.nodeControl.value}`;
+
+    this.networkInstance.body.data.nodes.update(node);
+
+    edgesCopy.forEach((edge) => {
+      edge.from == id ? (edge.from = newId) : (edge.to = newId);
+      if (edge.from != edge.to) {
+        this.networkInstance.body.data.edges.update(edge);
+      }
+    });
   }
 
-  private editNodeCallback(nodeData: any, callback: any) {
+  private canNodeBeEdited(currentId: any) {
+    let allNodes = this.networkInstance.body.data.nodes.get();
+    for (let node of allNodes) {
+      if (node.id == this.nodeIdControl.value && node.id != currentId) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private addNodeCallback(nodeData: any, callback: any) {
     this.showEditNode = !this.showEditNode;
-    nodeData.label = this.nodeControl.value;
+    nodeData.id = this.nodeIdControl.value;
+    nodeData.label = `[${this.nodeIdControl.value}] ${this.nodeControl.value}`;
     this.nodeControl.reset();
+    this.nodeIdControl.reset();
     callback(nodeData);
   }
 
@@ -113,11 +155,11 @@ export class AppComponent implements AfterViewInit {
 
   private getData(): any {
     const nodes = new DataSet<any>([
-      { id: 1, label: 'Node 1' },
-      { id: 2, label: 'Node 2' },
-      { id: 3, label: 'Node 3' },
-      { id: 4, label: 'Node 4' },
-      { id: 5, label: 'Node 5' },
+      { id: 1, label: `[1] Node1` },
+      { id: 2, label: '[2] Node2' },
+      { id: 3, label: '[3] Node3' },
+      { id: 4, label: '[4] Node4' },
+      { id: 5, label: '[5] Node5' },
     ]);
 
     this.nodeCount = nodes.length;

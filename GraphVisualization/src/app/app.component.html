@@ -7,13 +7,13 @@
           <button mat-flat-button (click)="addNode()" >Add Node</button>
       </div>
       <div class="button">
-          <button mat-flat-button (click)="showEditNode = !showEditNode; showSaveButton = true" >Edit Node</button>
+          <button mat-flat-button (click)="showEditNode = !showEditNode; showSaveButton = true; showEditEdge = false" >Edit Node</button>
       </div>
       <div class="button">
           <button mat-flat-button (click)="addEdge()">Add Edge</button>
       </div>
       <div class="button">
-          <button mat-flat-button (click)="showEditEdge = !showEditEdge; showSaveButton = true">Edit Edge</button>
+          <button mat-flat-button (click)="showEditEdge = !showEditEdge; showSaveButton = true; showEditNode = false">Edit Edge</button>
       </div>
       <div class="button">
           <button mat-flat-button (click)="removeSelected()">Remove Selected</button>
@@ -21,12 +21,21 @@
 
       <p class="message" *ngIf="showEditEdge && showSaveButton">You must first select an edge.</p>
       <p class="message" *ngIf="showEditNode && showSaveButton">You must first select a node.</p>
+      
+      
       <div class="edit-node popup" *ngIf="showEditNode">
           <form>
               <mat-form-field class="example-full-width">
-                  <mat-label>Node Name</mat-label>
-                  <input matInput [formControl]="nodeControl">
+                  <mat-label>Node Id</mat-label>
+                  <input matInput [formControl]="nodeIdControl">
               </mat-form-field>
+          </form>
+
+          <form>
+            <mat-form-field class="example-full-width">
+                <mat-label>Node Name</mat-label>
+                <input matInput [formControl]="nodeControl">
+            </mat-form-field>
           </form>
 
           <div class="button" *ngIf="showSaveButton">
@@ -43,6 +52,8 @@
               <button mat-flat-button (click)="editEdge()">Save</button>
           </div>
       </div>
+
+      <p class="message" *ngIf="showError">The id is already chosen.</p>
   </div>
   
   <div id="visNetwork" #visNetwork></div>
